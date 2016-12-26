@@ -1,0 +1,13 @@
+#!/bin/bash
+
+total=0
+host='your_hostname'
+email='your_email'
+for FILE in `find / -mount -mtime -1`;do
+	size=`stat -c %s $FILE`
+	total=$(($total+$size))
+done
+message="/tmp/changemessage.txt"
+echo "size of files changed in last 24 hours $total bytes " > $message
+/usr/bin/mail -s "File change on $host" "$email" < $message
+rm $message
