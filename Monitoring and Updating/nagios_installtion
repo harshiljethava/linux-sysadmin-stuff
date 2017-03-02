@@ -1,0 +1,74 @@
+# Before installing nagois , install required dependencies
+yum install -y httpd php gcc glibc glibc-common gd gd-devel make net-snmp
+
+# add user and usergroup
+useradd nagios
+groupadd naggrp
+
+# add both nagios and apache2 to group naggrp
+usermod -G naggrp nagios
+usermod -G naggrp apache
+
+# create directory for nagois
+mkdir /root/nagios
+
+# switch to nagios directory
+cd /root/nagios
+
+# download nagios and nagios plugins
+wget http://prdownloads.sourceforge.net/sourceforge/nagios/nagios-4.2.0.tar.gz
+wget https://www.nagios-plugins.org/download/nagios-plugins-2.1.2.tar.gz
+
+# Extract nagios core and plugins
+tar -xvf nagios-4.2.0.tar.gz
+tar -xvf nagios-plugins-2.1.2.tar.gz
+
+# Configure nagois 
+cd nagios-4.2.0
+./configure --with-command-group=naggrp [YOUR_NAGOIS_GROUP]
+				 
+# Complie and install
+make all
+make install
+
+# Install init scripts
+make install-init
+
+# To enable commnad line working of nagios
+make install-commandmode
+
+# Install config file
+make install-config
+
+# Customizing  nagios configuration
+vim /usr/local/nagios/etc/objects/contacts.cfg
+
+# Install Web interface
+make install-webconf
+
+# Create admin and set password
+htpasswd -s -c /usr/local/nagios/etc/htpasswd.users admin
+
+# Restart apache to take effect
+systemctl start httpd
+
+++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++ INSTALL NAGOIS PLUGINS ++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# switch to nagios directory
+cd /root/nagios/nagios-plugins-2.1.2
+
+# Complie and install nagios
+./configure --with-nagios-user=nagios --with-nagios-group=nagios
+make 
+make install
+
+# Verify configure files
+/usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+
+# make nagios service persistent
+systemctl enable nagios
+systemctl enable httpd
+
+

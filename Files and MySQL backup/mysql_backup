@@ -1,0 +1,11 @@
+#!/bin/bash
+dir="/usr/local/backups/"
+rdir="/shared/backups/servers/"
+mysqldir="${dir}ldap"
+filename="database_"
+num=`date +%Y%m%d`
+mysqldump -u root -p PASSWORD  --single-transaction
+	 -all-databases > ${mysqldir}${filename}${num}.ldif
+find $mysqldir -mtime +14 | xargs rm --
+cp $mysqldir/* $rdir
+
