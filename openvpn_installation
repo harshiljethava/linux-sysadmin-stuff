@@ -1,0 +1,81 @@
+# configure openvpn server and client
+
+# update yum
+yum update
+
+# install epel
+yum install epel-relase
+
+# install openvpn and easy-rsa 
+# easy-rsa is package to manage generation of keys and certificates  
+yum install openvpn easy-rsa
+
+# copy server.conf files from usr directory to etc
+cp /usr/share/doc/openvpn-VERSION/sample/sample-config-files/ /etc/openvpn
+
+# create rsa directory in etc to store all keys and certificate
+mkdir /etc/openvpn/rsa
+
+# copy all easy-rsa files from usr directory to etc
+cp /usr/share/easy-rsa/2.0/* /etc/openvpn/rsa
+
+# open server.conf file in /etc/openvpn
+vim /etc/openvpn/server.conf
+
+# change below values as per your need 
+export KEY_SIZE=2048
+export CA_EXPIRE=365
+export KEY_EXPIRE=365
+export KEY_COUNTRY=IN
+export KEY_PROVINCE=Mumbai
+export KEY_CITY="Mumbai"
+export KEY_ORG="harshiljethava.github.io"
+export KEY_EMAIL="harshiljethava7@gmail.com"
+export KEY_NAME="HarshilJethava"
+
+# save changes and do run below command to export variable to current environment
+source ./vars
+
+# run below command to clean default key file in /etc/openvpn/rsa/keys
+./clean-all
+
+# create Certificate Authority in /etc/openvpn/rsa/keys
+# also provide appropriate data in input
+./build-ca
+
+# create key and certificate for server
+./build-key-server server
+
+# create Diffie-Hellman file to exchange information through RSA algorithm
+./build-dh
+
+# create client certificate  for each client
+# this file will download by respective client which is used to connect VPN server
+./build-key client1
+./build-key client2
+
+### Configure openvpn server by editing /etc/openvpn/server.conf
+# add below parameter to conf file
+dh /etc/openvpn/rsa/keys/dh2048.pem
+push "redirect-gateway def1 bypass-dhcp"
+
+# add dns server to resolve names
+push "dhcp-option DNS 208.67.222.222"
+push "dhcp-option DNS <DNS SERVER IP>"
+
+# enable least privilege for openvpn by uncommentting following lines
+user nobody
+group nobody
+
+# enable required services in firewall
+firewall-cmd --permanent --add-service=openvpn
+firewall-cmd --permanent --add-masquerade
+
+# copy required certificate and key files from /rsa/keys  to /etc/openvpn
+cp ca.crt server.crt server.key /etc/openvpn/
+
+# enable openvpn service 
+systemctl enable openvpn@server
+
+# start openvpn service
+systemctl start openvpn@server
