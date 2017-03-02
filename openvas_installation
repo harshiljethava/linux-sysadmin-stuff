@@ -1,0 +1,31 @@
+# Install OpenVAS vulnerability scanner
+
+# update yum 
+yum update
+
+# download atomicorp repository 
+wget -q -O - http://www.atomicorp.com/installers/atomic
+
+# select appropriate option
+
+# install openvas
+yum install openvas
+
+# setup openvas
+openvas-setup
+
+# above command takes time to complete as it download latest database from repository
+
+# select options to allow connection from any IP 
+
+# create admin user and password for openvas
+
+# open firewall port to access web interface of openvas
+firewall-cmd --permanent --add-port=9392/tcp
+firewall-cmd --permanent --add-port=9392/udp
+
+# reload firewall settings
+firewall-cmd --reload
+
+# open below link in browser to access web interface of openvas
+https://<IP>:9392
