@@ -1,0 +1,51 @@
+# Install and configure PostgreSQL server on CentOS
+
+# centos by default contains postgresql packages just install through yum
+yum install postgresql-server postgresql-contrib
+
+# Before using postgresql initialize PGDATA to up postgresql server
+postgresql-setup initdb
+
+# enable host base authentication to postgres database
+# To do ,open /var/lib/pgsql/data/pg_hba.conf and change ident to md5
+host    all             all             127.0.0.1/32            md5
+host    all             all             ::1/128                 md5 
+
+# Open port in firewall for postgresql 
+firewall-cmd --permanent --add-port=5432/tcp
+firewall-cmd --permanent --add-port=80/udp
+
+# reload firewall-cmd to take place changes
+firewall-cmd --reload
+
+# Adjust SELinux flag for postgresql
+setsebool -P httpd_can_network_connect_db 1
+ 
+# start and enable postgresql
+systemctl start postgresql
+systemctl enable postgresql
+
+# create role and database
+sudo -i -u postgres
+
+# in postgre bash terminal create user
+createuser --interactive
+
+# in same postgre bash terminal create database
+createdb <DB>
+
+# access postgres db terminal
+psql
+
+# select dabatabase
+psql -d <DB>
+
+# install adminpack for postgresql
+# please install this command in db terminal
+CREATE EXTENSION adminpack;
+
+# database info # \conninfo
+# quit database # \q
+# list tables in database # \d
+
+
