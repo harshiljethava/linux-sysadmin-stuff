@@ -1,0 +1,97 @@
+##################################################################
+#	List of commands for Mariadb administration	         #
+##################################################################
+
+# check mysql version
+mysql -u username -p version
+
+
+# login in mariadb server
+mysql -u [user] -p 
+
+# create normal user for database ,% used for remote server
+create user 'username'@'%' identified by 'password';
+create user 'username'@'localhost' identified by 'password';
+
+# view privileges of users
+show grant for 'username'@'localhost';
+
+# grant privilege to user
+grant all privileges on database_name.* TO 'username'@'localhost' identified by 'password';
+
+# flush privilege of logged in user
+flush privileges;
+
+# show databases in mariadb
+show databases;
+
+# show running process list
+show full processlist;
+
+# change user password
+use mysql;
+update user set password=PASSWORD('password') where User='username';
+
+# delete user
+drop user 'username'@'localhost';
+
+### BACKUP MARIADB ###
+# take backup or dump of database
+mysqldump -u username -p DATABASENAME > DATABASRBAK_date.sql
+
+# restore database dump
+mysql -u username -p DATABASENAME < DATABASEBAK_date.sql
+
+# take backup in gzip format
+mysqldump -u username -p DATABASENAME | gzip > DATABASEBAK_date.sql.gz
+
+# restore dump from gzip sql format
+gunzip < DATABASEBAK_date.sql.gz | mysql -u username -p DATABASENAME
+
+# take backup of particular table in mariadb
+mysqldump -u username -p DATABASENAME TABLENAME > TABLEBAK_date.sql
+
+# kill queries takes lot time to execute
+show processlist;
+kill pid1 pid2;
+
+################<  mysqladmin command example >##########################
+
+# check all mariadb variable 
+mysqladmin -u root -p variables
+
+# check database uptime related information
+mysqladmin -u root -p status
+
+# display all extra database values 
+mysqladmin -u root -p extended-status
+
+# run command to remote server
+mysqladmin -h host_ip -u username -p [command]
+
+# debug mysql error message from logs
+mysqladmin -u root -p debug
+
+# reload and refresh database
+mysqladmin -u root -p reload
+mysqladmin -u root -p refresh
+
+# shutdown database
+mysqladmin -u root -p shutdown 
+
+# flush all thread cache
+mysqladmin -u root -p flush-threads
+
+# flush commands option
+mysqladmin -u root -p flush-privileges
+mysqladmin -u root -p flush-status
+mysqladmin -u root -p flush-hosts
+mysqladmin -u root -p flush-logs
+
+# start mariadb in slave mode
+mysqladmin -u root -p start-slave
+
+# stop mariadb in slave mode
+mysqladmin -u root -p stop-slave
+
+
