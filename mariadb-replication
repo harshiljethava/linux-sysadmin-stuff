@@ -1,0 +1,133 @@
+# configure mariadb replication
+
+# Let`s take 192.168.0.201 as master and 192.168.0.202 as slave
+
+# install mariadb
+yum install mariadb-server mariadb-client
+
+# start and enable mariadb 
+systemctl start mariadb
+systemctl enable mariadb
+
+# Allow mysql service through fiewall
+firewall-cmd --permanent --add-service=mysql
+firewall-cmd --reload
+
+#<<<<<<<<< MASTER configuration >>>>>>>>>>>>>>
+
+# open mariadb configuration file /etc/my.cnf and do following changes
+
+# Enable binary logging
+log-bin
+
+# Give unique id to master server
+server_id=1
+
+# provide database for replication (optional)
+replicate-do-db=DATABASENAME
+
+## check following parameter which may impact the replication
+
+# value of skip-networking should be 0
+skip-networking
+
+# value of bind-address should not be localhost or 127.0.0.1
+bind-address
+
+# restart mariadb to load the changes
+systemctl restart mariadb
+
+# login in mysql terminal with root create slave user
+mysql -u root -p 
+
+#>>> execute all below commands in mysql terminal
+create user 'SLAVE_USER'@'localhost' identified by 'SLAVE_PASSWORD';
+
+# grant replication privileges to slave user 
+grant replication slave on *.* To SLAVE_USER identified by 'SLAVE_PASSWORD' with grant option;
+
+# reload privileges
+flush privileges;
+
+# put read lock to tables so that changes happens to database can be prevented 
+flush table with read lock;
+
+# show master status;
+
+# note down value of File and Position parameter 
+
+# create mysqldump of database
+mysqldump -u root -p DATABASENAME > DATABASE_DUMP.sql
+
+# Execute below command in mysql terminal to unlock tables
+unlock tables;
+
+# copy the dump to slave server (eg : 192.168.0.202)
+scp DATABASE_DUMP.sql root@192.168.0.202:~
+
+# upgrade mysql tables
+mysql_upgrade -u root -p
+
+
+#<<<<<<<<< SLAVE configuration >>>>>>>>>>>>>>
+
+# install mariadb server
+yum install mariadb-server mariadb-client
+
+# start and enable mariadb service
+systemctl start mariadb
+systemctl enable mariadb
+
+# Allow mysql service through fiewall
+firewall-cmd --permanent --add-service=mysql
+firewall-cmd --reload
+
+# login in mysql terminal and create database
+mysql -u root -p
+
+create database DATABASENAME;
+
+# grant privilege to SLAVE_USER 
+grant privileges on DATABASENAME.* to 'SLAVE_USER'@'localhost' identified by 'SLAVE_PASSWORD' with grant option;
+
+# reload privilege
+flush privileges;
+
+# exit mysql terminal and load the copied dump from master
+mysqldump -u root -p DATABASENAME < DATABASE_DUMP.sql
+
+# open mariadb configuration file /etc/my.cnf and do following changes
+
+# assign unique server id to slave
+server-id=2
+
+# provide replication database name (optional)
+replicate-do-db=DATABASENAME
+
+# restart mariadb 
+systemctl restart mariadb
+
+# upgrade mariadb 
+mysql_upgrade -u root -p
+
+# execute following query in mysql terminal
+ CHANGE MASTER TO
+ MASTER_HOST='MASTER_SERVER_IP',
+ MASTER_USER='SLAVE_USER',
+ MASTER_PASSWORD='SLAVE_PASSWORD',
+ MASTER_PORT=3306,
+ MASTER_LOG_FILE='master-bin.000001', // change this to master server log file value
+ MASTER_LOG_POS=314, // change to master server log_pos value
+ MASTER_CONNECT_RETRY=10,
+ MASTER_USE_GTID=current_pos;
+
+# start the slave server
+start slave;
+
+# display slave server information
+show slave status\G;
+
+# Check the value of LOG_POS and LOG_FILE in slave server status 
+
+# stop slave server
+
