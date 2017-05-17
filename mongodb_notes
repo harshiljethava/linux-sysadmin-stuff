@@ -1,0 +1,113 @@
+###installing mongodb in ubuntu
+
+curl -O https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.4.4.tgz
+tar -zxvf mongodb-linux-x86_64-3.4.4.tgz
+mkdir -p mongodb
+cp -R -n mongodb-linux-x86_64-3.4.4/ mongodb
+export PATH=<mongodb-install-directory>/bin:$PATH
+
+### Run mongodb instance
+mongo
+
+# check server status in mongodb-cli
+db.serverStatus()
+
+# switch to db
+use DBNAME
+use harshildb
+
+### collection is just same as table in RDBMS
+# insert values in db
+db.COLLECTION_NAME.insert(key1:"value1",...keyn:"valuen")
+db.interest.insert({name:"harshil",interest:["Programming,Learning"]})
+
+# display insert db info
+db.DBNAME.find()
+db.harshildb.find()
+
+# display dbinfo in human readable form
+db.harshildb.find().pretty()
+
+## json and bson (binary json for mongodb)
+
+## schemaless but strctured
+
+## collection is like table in mysql
+
+# list collections in db
+show collections
+
+### check disk space used my collection in mongodb
+db.harshildb.stats(SCALE)
+db.harshildb.stats(1024) # will display result in kilobytes
+
+#OjbectID is 12 byte BSON unique and automatically generated	
+
+# insert bulk value to db collection
+mongo DBNAME COLLECTION_NAME javascript_file.js
+mongo harshildb interest info.js
+
+# count record in collection
+db.COLLECTION_NAME.count()
+db.interest.count()
+
+# sorting data
+db.interest.sort({"key":1}) # 1 for ascending order & -1 
+
+# search record in db
+db.COLLECTION_NAME.find({key:"value"})
+db.interest.find({name:"murphy"})
+
+# indexing in db
+db.COLLECCTION_NAME.ensureIndex({key:value})
+db.interest.ensureIndex({name:"harshil"})
+
+# get index value
+db.COLLECTION_NAME.getIndexs()
+db.interest.getIndex()
+
+### purning data from db
+
+#remove
+db.collections_name.remove({key:"value"})
+db.interest.remove({name:"harshil"})
+
+# remove all record from collections
+db.collections_name.remove()
+db.interest.remove()
+
+# drop the collections
+db.collections_name.drop()
+db.interest.drop()
+
+# list the db
+show dbs
+
+# drop the db
+db.dropDatabase()
+
+### Backing up db
+mongodump --db DB --out BAK_PATH
+mongodump --db harshildb --out /home/harshil
+
+### Restore db
+with git db restoration can be done.
+
+# restore with mongorestore
+db.dropDatabase()
+mongorestore mongodump_path
+mongorestore /home/harshil
+
+### Aditional backup options
+# 1 mongodb process with mongodump
+# 1 mongodb process with file system backup (LVM in linux)
+# 2 mongodb process with redundant data (master /slave)
+# 1 mongodb process with MMS backup (paid)
+
+### Security
+
+### MapReduce
+
+#Map-reduce is a data processing paradigm for condensing large volumes of data into useful aggregated results. 
+
+
