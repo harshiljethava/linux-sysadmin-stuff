@@ -1,0 +1,260 @@
+1) AD Server
+	> Physical
+	> 4 GB RAM
+	> DNS
+2) ESXi1 server
+	> Physical
+	> 8 to 16 GB
+3) ESXi2 server
+	> Physical
+	> 8 to 16 GB
+4) Vcenter server
+	> Physical
+	> 4 GB RAM
+5) Storage Drive
+	> iscsi
+	> 200 GB
+6) Storege Drive
+	> NFS
+	> 100GB
+#######################
+
+======IP Schema======
+1) Management network ip
+	> 192.168.1.1-254
+	> 255.255.255.0
+2) Storage network ip
+	> 192.168.2.1-254
+	> 255.255.255.0
+3) VM Net 1
+	> 172.16.1.1-254
+	> 255.240.0.0
+4) VM Net 2
+	> 172.16.2.1-254
+	> 255.240.0.0
+5) vmotion network
+	> 172.16.3.1-254
+	> 255.254.0.0
+
+
+#######################
+
+== Lab Practical ===
+
+1) install esxi 1 & 2 server
+2) give them static ip as per management network schema
+3) install and configure AD server
+4) enter all host detail in AD DNS server for name resultion
+5) browse the esxi server and download vsphere client to access it
+
+
+
+
+#######################
+
+===NOTES SECTION =======
+
+9) vcenter option
+
+> Platform controller
+	> signle signon
+	> license manager
+	> certificate authority
+
+> vCenter Server
+	> Inventory service
+	> PostgreSQL
+	> Web client
+	> Dump Collector
+	> Syslog Collector
+	> Syslog Service
+	> Auto Deploy
+
+In large oraganization it good to have platform controller and vcenter server
+as separate entity.However if oraganization is small,platform controller 
+vcenter server should be as one single entity.
+
+> go through below link sbefore vCenter installation 
+https://www.vmware.com/content/dam/digitalmarketing/vmware/en/pdf/techpaper/vmware-vcenter-server6-deployment-guide-white-paper.pdf
+
+
+12) add ESXi host in vCenter and organization of vcenter
+
+> Organizate vcenter server
+	> Folder (create folder to manage esxi host region or geography wise like usa,uk)
+	> datacenter 
+	> Cluster (create cluster of many esxi hosts as one cluster to manage all vms from single node)
+
+> Adding esxi host in vcenter
+	> create folder and create datacenter in it (creating folder is optional while data center is mandatory)
+	> create cluster (optional)
+	> add esxi host in created cluster or directly to datacenter
+	> make sure when you add more esxi host in DC datastore name of esxi should be different.
+
+
+13) Intro to datastore
+
+> storage location of VMs and it related file like vmx,vmdk etc
+> Location 
+	> local
+	> network (NFS,SAN,Fiber Channel SAN)
+	> Virtual SAN
+
+> Types
+	> VMFS (block base)
+	> NFS (File base)
+
+> VM disk provisioning
+	> Thick
+	> Thin
+
+> create the data store for esxi host
+> upload test file in esxi host (upload iso file to create vm using it)
+
+14) Deploying VM in vsphere
+
+15) Installing vm tools
+
+16) Using VM templates
+
+17) OVF and OVA
+
+18) Snapshots
+> Reverting VM to earlier state
+
+> Snapshot files extension
+	> vmsn ,vmsd, 
+	> another vmdk file contain snapshot information
+
+
+
+19) Intro to vsphere networking
+> every esxi host contain default vSwitch as virtual switch.
+> VM port groups
+> VM Kerner port
+
+> every esxi host has default network - VM network
+whenever any VM connects to that network one virtual port will assign for communication between esxi and vm.
+
+> VM kernel port
+	> its like management network/ip of that esxi host.
+	> via this network can be connected to esxi host.
+
+20) creating vSwitch
+> create
+	> vSwitch
+	> VM port group
+> Assign
+	> vmnic (uplink)
+> Connect VMs
+	> via port group
+
+21) Freesco Router VM
+
+
+22) iSCSI concepts
+
+> storage technologies
+	> iscsi
+	> fiber channel
+	> FCOE 
+	> Direct Attached ( directly attached to particular esxi host or local hdd of esxi host) 
+	> NFS
+
+> iSCSI concepts
+	> Target (generally storage portion )
+		> LUNs (Logical Unit Number)
+		> SPs
+		> IQN (Initiator Qualified Name)
+	> Initiator (client like esxi host which are connected to Target)
+		> HBA (Host Bus Adapter : Physical Connector to connect Target and Initiator whith each other.)
+		> VMkernel ( Dedicated vmkernel port for iscsi ) 
+
+> always do have separate netwokrs for management and storage. provide dedicated network/VLAN for storage.
+
+> Physical HBA connectivity is optional.
+
+LINK : http://www.cables-solutions.com/whats-the-difference-between-hba-nic-and-cna.html
+
+23) Setting up Windows server ad iSCSI Target
+> Here Windows server acts as iSCI Target. Using windows server will create iSCSI disk which will be used by ESXi host as iSCSI initiator.
+
+> Here windows server acts as storage processor. Openfiler can be used for the same.
+
+> Link : https://www.openfiler.com/
+> for NAS : https://www.openmediavault.org/
+
+24) Implementing iSCSI datastore
+
+> on initiator side (ESXi host)
+	> VMKernel
+		> Create Vswitch in ESXi host for dedicated storage network.
+		> add vmkernel port to newly created switch.
+	> Host Bus Adpter
+		> create HBA in esxi host by using storage option in esxi.
+	> Binding
+		> Bind created iSCSI disk to esxi host with storage and network option.
+	> Creation
+
+25) iSCSI multipathing // refer online once again
+
+> multiple VMkernel ports and vmnic to provide the fault tolerence connectivity between iSCSI target and initiator.
+> objective is to maximize throughput and fault tolerence
+
+> provide separate and dedicated vmnic to vmkernel/vswitch.also its good practise to have different physical switch connection to different vmnic.
+> add created vmkernel/vswitch to iscsi.
+
+26) create NFS datastore
+
+> compared to iSCSI , NFS is file base storage while iSCSI is block base.
+
+> in NFS data can store in file system instead of block.
+
+> Create NFS drive and windows server and also create NFS share folder in it.
+
+> Mount created NFS share folder of server to esxi host as new datastore.
+
+> Once mounted for one esxi host , it can be mounted for any other esxi host have same connectivity.
+
+> For creating NFS openfiler can be used instead of Windows server.
+
+
+27) vMotion and Migration
+
+> transferring currently running vm to other esxi - vMotion
+
+> transferring currently NOT running vm to other esxi - Migration
+
+> always use separate network for vMotion as it require high b/w.
+
+> Mandatory to have same vm port group on both esxi host.
+
+> Hardware configuration of both esxi host should be same or compatible with each other.
+
+28) Distributed Resource Scheduler (DRS)
+
+> Require
+	> vMotion
+	> Shared storage
+	> Cluster
+
+> Type of DRS 
+	> Recommended base
+	> Partially Automated
+	> Fully automated
+
+> Use Damm Small Linux (dsl) to test high cpu load in esxi host.
+
+29) Intro to Distributed Switch
+
+> centerlized control entity to manage networking
+
+> insted of creating vSwitch on each individual esxi host, create dvSwitch which will manage all networking of all esxi centerally.
+
+> google : standard vSwitch VS dvSwitch
+
+30) Implementing dvSwitch
+
+
+
+
