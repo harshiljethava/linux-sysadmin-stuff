@@ -1,0 +1,12 @@
+Single User Mode Security
+
+This mode allow user to gain root access by interrupting boot process. This can be done by editing grub config file from boot.
+Place the S in end of linux line in grub and save the file. This way you will get the root access of the system without entering any password!
+Important file for single user mode security
+/lib/systemd/system/emergency.service
+/lib/systemd/system/rescue.service
+
+After RHEL 7.x all version are coming with default sulogin in both emergency and rescue mode.
+
+ExecStart line contains shell configure in both files (emergency.service and rescue.service)
+Changing"/usr/sbin/sulogin" to "/usr/sbin/sushell" will result in single mode security. Mean any user can get the access the root console using emergency and rescue mode.
