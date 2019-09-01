@@ -1,0 +1,38 @@
+## important grub boot loader files
+
+# GRUB2 reads its configuration from below grub.cfg file.
+/boot/grub2/grub.cfg
+
+# default menu configuration settings file
+/etc/default/grub
+
+# below command is used to generate new grub.cfg
+grub2-mkconfig -o /boot/grub2/grub.cfg (or specified path of grub.cfg file)
+
+## secure grub boot loader
+
+# set grub boot loader password. Below command will generate password of default superuser "root" of grub boot loader.
+grub2-setpassword
+
+# check the default superuser of grub boot loader in /boot/grub2/grub.cfg in BEGIN /etc/grub.d/01_users section, set superuser="root"
+
+# generate encrypted password using below command
+grub2-mkpasswd-pbkdf2
+
+# open /etc/grub2/01_users and enter the following at bottom of line
+set superusers="test"
+passwd_pbkdf2 test
+encrypted passwordXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+# generate new grub configuration
+grub2-mkconfig -o /boot/grub2/grub.cfg
+
+## secure boot entries
+
+# open /boot/grub2/grub.cfg
+
+# find the boot entry beginning with menuentry
+
+# delete the --unrestricted parameter from menu block
+
+
